@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html prefix="og: http://ogp.me/ns#">
+<head>
+    <meta charset="UTF-8" />
+	    <!-- OGPタグの設定 -->
+  		<meta property="og:url" content="http://niltheria.daynight.jp/bbt/tools/index.html" />
+		<meta property="og:title" content="BBT セッション準備支援ツール" />
+		<meta property="og:description" content="「ビーストバインドトリニティ」用の、主にオンラインセッションの準備を簡略化するためのwebツール集。" />
+		<meta property="og:image" content="http://niltheria.daynight.jp/sitelogo_summary.png" />
+		<meta property="og:type" content="article" />
+		<meta property="og:site_name" content="NiLtheria" />
+		<meta property="og:locale" content="ja_JP" />
+		<meta name="twitter:card" content="summary" />
+		<meta name="twitter:site" content="@u_krasaka" />
+    <!-- ここまで -->
+
+    <!-- HTML タイトル -->
+    <title>BBT チャットパレットコンバーター</title>
+
+    <!-- CSSの設定 -->
+    <link href="css/w3.css" rel="stylesheet" type="text/css">
+
+    <style type="text/css">
+        .table-padding th { text-align: center; }
+        .table-padding td { padding:0.5em; }
+        .artsname { font-weight: bold; }
+        .clearfix:after {
+            content: "";
+            clear: both;
+            display: block;
+        }
+        .columns {
+            -webkit-columns: 2;
+            -moz-columns: 2;
+            -ms-columns: 2;
+            columns: 2;
+        }
+        .pone_output {
+            display: none;
+            margin: 0.25em 2em;
+        }
+        .pone_output_quick {
+            margin: 0.25em 2em;
+        }
+    </style>
+
+    <script type="text/javascript">
+        function btn_click() { return; }
+    </script>
+
+</head>
+
+<body>
+    <!-- タイトルスライド -->
+    <div class="w3-container w3-indigo">
+        <h2>《<ruby>変換<rt>くみかえるもの</rt></ruby> -Palette Converter-》</h2>
+        <p class="w3-small">
+            《変換 -Palette Converter-》は、<a href="http://character-sheets.appspot.com/" target="_blank" class="w3-hover-blue">キャラクターシート倉庫</a>に保存されたBBTのキャラクターシートから、各種オンラインセッションツールで使用するチャットパレットを生成する準備支援ツールです。
+        </p>
+    </div>
+
+    <!-- 0: 基本的な出力のオプション -->
+    <div class="w3-container" style="margin-bottom: 1em;">
+        <p class="w3-panel w3-leftbar w3-border-bottom w3-large w3-border-indigo w3-hover-indigo">使い方</p>
+        <ol class="w3-small">
+            <li>キャラクターシート倉庫に保存済みのキャラクターシートのURLをコピーし、下欄に貼り付ける</li>
+            <li>使用するオンラインセッションツールを、リストから選択（該当するオンセツールがない場合は「選択してください」のままにするか「その他のツール」を選ぶ）</li>
+            <li>出力の詳細な設定がしたい場合は、各種オプションのタイトル部分をクリックして、詳細な入力を行う</li>
+            <li>「チャットパレットに変換」ボタンを押し、画面最下部のテキストエリアから出力したテキストをコピーする。内容は必ず確認すること。
+                <ul>
+                    <li>「ユドナリウム」「ココフォリア」では、キャラクター駒の出力も可能。</li>
+                </ul>
+            </li>
+        </ol>
+    </div>
+
+    <!-- 1: キャラクターシート倉庫のURLを入力する欄 -->
+    <div class="w3-container" style="margin-bottom: 1em;">
+        <p class="w3-panel w3-leftbar w3-border-bottom w3-large w3-border-indigo">キャラクターシートのURL入力／使用オンラインセッションツールの選択</p>
+        <form name="sheet_info" style="padding: 0em 2em;">
+            <div style="margin:0.5em;"><strong>URL:</strong> <input type="text" name="sheet_url" size="60"> <span class="w3-text-red" style="font-weight:bold;">※各種URL短縮サービスのアドレスは不可</span></div>
+            <div style="margin:0.5em;">
+                <strong>使用ツール：</strong>
+                <select name="using_tool" onChange="setup_PoneConverter(this)">
+                    <option value="noselect"  >選択してください</option>
+                    <option value="udonarium" >ユドナリウム</option>
+                    <option value="ccfolia"   >ココフォリアv1.x</option>
+                    <option value="tekey"     >Tekey(β)</option>
+                    <option value="trpgstudio">TRPGスタジオ</option>
+                    <option value="quoridorn" >Quoridorn</option>
+                    <option value="others"    >その他のツール</option>
+                </select>
+            </div>
+        </form>
+        <div class="w3-container w3-small">
+            <span class="w3-hover-blue w3-border-bottom w3-border-blue" onclick="obj=document.getElementById('tools_feature').style; obj.display=(obj.display=='none')?'block':'none';">【能力値】の出力は、使用するオンラインセッションツールに合わせて以下のように変わります。（クリックで開閉）</span>
+            <ul id="tools_feature" style="display:none;">
+                <li style="margin:0.5em 0;">ユドナリウム
+                    <ul>
+                        <li><strong>チャットパレット側には組み込まない。</strong>
+                            <ul>
+                                <li>【能力値】を駒側に手入力する場合、《魔獣化》中の【能力値】は「魔肉」「魔技」「魔感」…「魔射」「魔回」「魔行」のように、「魔」＋「その能力値の頭1文字」で入力します。</li>
+                                <li>また、【能力値】をチャットパレット内に予約語として書いても機能します。キャラクター駒側に【能力値】を入力しない場合は「その他のツール」「tekey」「Quoridorn」のいずれかを選んで出力してください。</li>
+                            </ul>
+                        </li>
+                        <li><strong class="w3-text-red">キャラクター駒変換機能対応。</strong>
+                            <ul>
+                                <li>チャットパレット変換の際に、駒データとして打ち出すことも選べます。</li>
+                                <li>使用する場合、出力されたzipファイルをそのままユドナリウムにドラッグ＆ドロップしてください。</li>
+                                <li>「ユドナリウムリリィ」用の機能として、「バフパレット」の組み込みも可能です。</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+                <li style="margin:0.5em 0;">ココフォリア
+                    <ul>
+                        <li><strong>チャットパレット側には組み込まない。</strong>
+                            <ul>
+                                <li>【能力値】を駒側に手入力する場合、「パラメータ」として、《魔獣化》中の【能力値】は「魔肉」「魔技」「魔感」…「魔射」「魔回」「魔行」のように、「魔」＋「その能力値の頭1文字」で入力します。</li>
+                                <li>キャラクター駒側に【能力値】を入力しない場合は「その他のツール」を選んで出力してください。</li>
+                            </ul>
+                        </li>
+                        <li><strong class="w3-text-red">キャラクター駒変換機能対応。</strong>
+                            <ul>
+                                <li>チャットパレット変換の際に、駒データとして打ち出すことも選べます。</li>
+                                <li>使用する場合、出力されたzipファイルをそのままココフォリアにドラッグ＆ドロップしてください。<strong class="w3-text-red">「立ち絵」機能は対応していません。ココフォリア上で編集してください。</strong></li>
+                                <li><strong class="w3-text-red">本機能はccfolia v1.x系列をもとに作成しており、v2.x以降には対応していない可能性があります。あらかじめご了承ください。</strong></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+                <li style="margin:0.5em 0;">Tekey、Quoridorn：チャットパレット側に組み込む。</li>
+                <li style="margin:0.5em 0;">TRPGスタジオ：ダイスコマンド用のテキスト整形を行います。その他の機能については、「その他のツール」と同等です。</li>
+                <li style="margin:0.5em 0;">その他のツール：チャットパレット側に【能力値】を組み込まず、【能力値】の数値をそのまま判定文に平書きします。<br>クリティカル値は強調するために最初から<strong class="w3-text-red">@12(クリティカル値12)</strong>を入力しています。適宜変更を。
+                    <ul>
+                        <li>R2/9/25時点での想定する該当ツールは「オンセンSNS」「soldoresol」。</li>
+                    </ul>
+                </li>
+                <li style="margin-top:0.5em;">対応していないオンラインセッションツールについて
+                    <ul style="margin-bottom:0.5em;">
+                        <li class="w3-text-red" style="font-weight:bold;">「ねこ卓」や更新されていない「どどんとふ」等、BCDiceのバージョンが古いツール → 「その他のツール」で出力し、頭のシーン登場ダイスを1D6KH1から1D6に変更すれば使用はできます。（迫害状態中のものも同様に変更）<br>これらのツールはクリティカル値・ファンブル値の設定も符号付き書式が使えないので、手動で設定してください。</li>
+                        <li>ダイスゴリラ：R2/9/25時点ではBCDiceに対応していないとのマニュアル表記であり、現時点では対象外</li>
+                        <li>Tablk、Foundry VTT/オンセ工房：情報不足</li>
+                        <li>ゆとチャadv.：もともとがソードワールドとダブルクロス向けを意識したツールであり、こちらの調査が追いついていないため</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 3: 基本的な出力のオプション -->
+    <div class="w3-container" style="margin-bottom: 1em;">
+        <p class="w3-panel w3-leftbar w3-border-bottom w3-large w3-border-indigo w3-hover-indigo" onclick="obj=document.getElementById('section_03').style; obj.display=(obj.display=='none')?'block':'none';">基本的な出力のオプション（クリックで開閉）</p>
+        <form name="output_basic" style="padding: 0em 2em; display: none;" id="section_03">
+            <label><input type="checkbox" name="include_basic"   checked> 一般的な行動のテキストを出力する</label>　<span class="w3-small">※通常移動、離脱移動、武器攻撃などが該当</span><br>
+            <label><input type="checkbox" name="include_arts"    checked> 取得アーツの情報を出力する</label><br>
+            <label><input type="checkbox" name="include_items"   checked> 取得アイテムの情報を出力する</label><br>
+            <label><input type="checkbox" name="include_weapon"  checked> 武器・乗り物のダメージロール用テキストを出力する</label><br>
+            <label><input type="checkbox" name="include_react"   checked> 一般的なリアクションのテキストを出力する</label>　<span class="w3-small">※「ドッジ」および装備欄のガード値が対象</span><br>
+            <br>
+            判定文の並べ替え基準　
+                <label><input type="radio" name="sort_roll" value="能力値別" checked> 【能力値】別</label>　
+                <label><input type="radio" name="sort_roll" value="魔獣化別"> 《魔獣化》の有無</label>
+        </form>
+    </div>
+
+    <!-- 4: アーツ、アイテム出力のオプション -->
+    <div class="w3-container" style="margin-bottom: 1em;">
+        <p class="w3-panel w3-leftbar w3-border-bottom w3-large w3-border-indigo w3-hover-indigo" onclick="obj=document.getElementById('section_04').style; obj.display=(obj.display=='none')?'block':'none';">アーツ・アイテム出力のオプション（クリックで開閉）</p>
+        <form name="output_arts_items" style="padding: 0em 2em; display: none;" id="section_04">
+            <label><input type="checkbox" name="timing_empty" checked> 「タイミング」が空欄のアーツ・アイテムを出力テキストに含める</label><br>
+            <label><input type="checkbox" name="timing_passive" checked> 「タイミング」が「常時」のアーツ・アイテムを出力テキストに含める</label><br>
+            <label><input type="checkbox" name="arts_cost" checked> アーツの「コスト」を出力テキストに含める</label><br>
+            <label><input type="checkbox" name="effect" checked> アーツやアイテムの「効果」を出力テキストに含める</label>
+        </form>
+    </div>
+
+    <!-- 5: ダメージロール出力のオプション -->
+    <div class="w3-container" style="margin-bottom: 1em;">
+        <p class="w3-panel w3-leftbar w3-border-bottom w3-large w3-border-indigo w3-hover-indigo" onclick="obj=document.getElementById('section_05').style; obj.display=(obj.display=='none')?'block':'none';">ダメージロール出力のオプション（クリックで開閉）</p>
+        <p class="w3-small">
+            <span class="w3-text-red" style="font-weight:bold;">※ダメージロール式はユーザーによって書き方に幅がありすぎるため、すべてに対応することができません。必ず、出力された式を確認し、修正してください。</span><br>
+            <span class="w3-text-red">※特定のアーツを重ねた場合の細かな修正などは、手動で対応するか、キャラクターシートに武器のダメージロールとして入力してください。</span><br>
+            <span class="w3-text-red">( )で括った部分は魔獣化中のみのデータとして自動で切り分けます。キャラクターシート欄には攻撃力の式のみが記入されていることを想定した変換機能です。</span><br>
+            キャラクターシートの攻撃力欄が「+」で始まる（例：+5+2D6）場合、武器属性の【能力値】を挿入します。<br>
+            キャラクターシートの攻撃力欄が属性で始まる（例：肉体+5+2D6）場合、属性名の部分をその【能力値】で置き換えます。
+        </p>
+        <form name="output_damage_rolls" style="padding: 0em 2em; display: none;" id="section_05">
+            <label><input type="checkbox" name="weapon_note"> 武器のダメージロールに「備考」欄の内容もあわせて出力する</label><br>
+            <label><input type="checkbox" name="arts_note" checked> アーツ効果欄に<b>[ ]</b>で囲まれた部分をダメージロールとして出力する</label>　<span class="w3-small">※属性もあわせて書く場合、山括弧〈 〉か半角の不等号&lt; &gt;で該当する文字を囲んでください</span>
+        </form>
+    </div>
+
+    <!-- 6: 【能力値】判定への個別の修正 -->
+    <div class="w3-container" style="margin-bottom: 1em;">
+        <p class="w3-container w3-leftbar w3-border-bottom w3-large w3-border-indigo w3-hover-indigo" onclick="obj=document.getElementById('section_06').style; obj.display=(obj.display=='none')?'block':'none';">各【能力値】判定への個別の修正（クリックで開閉）</p>
+        <p class="w3-small">
+            <span class="w3-text-red">※以下のアーツを取得している場合、この項目の設定を強く推奨します。→</span>
+            <strong class="w3-text-red">《魔剣の使い手》《幻想存在》《ダメ人間》《ダメ半魔》などの常時判定修正がかかるアーツ、ファンブル値が変化する常時アーツ</strong><br>
+            <span class="w3-text-red">※命中判定、ドッジの判定や、特定のアーツを使用するときのみにかかる修正は、出力後にテキストをコピペして調整してください。</span>
+        </p>
+        <div class="w3-container"  style="display: none;" id="section_06">
+            <table class="w3-border w3-striped table-padding w3-border-black" style="float: left; margin-right: 2em;">
+                <tr>
+                    <th>【能力値】</th>
+                    <th>常時修正</th>
+                    <th>人間状態</th>
+                    <th>魔獣化中</th>
+                </tr>
+                <form name="output_judge_bonus" style="padding: 0em 2em;">
+                <tr class="w3-pale-red">
+                    <th>全ての判定</th>
+                    <td>修正 <input type="text" size="2" name="all_auto"></td>
+                    <td>修正 <input type="text" size="2" name="all_human"></td>
+                    <td>修正 <input type="text" size="2" name="all_beast"></td>
+                </tr>
+                <tr class="w3-pale-blue">
+                    <th>【基本能力値】<br>判定</th>
+                    <td>修正 <input type="text" size="2" name="base_auto"></td>
+                    <td>修正 <input type="text" size="2" name="base_human"></td>
+                    <td>修正 <input type="text" size="2" name="base_beast"></td>
+                </tr>
+                <tr>
+                    <th>【肉体】</th>
+                    <td>修正 <input type="text" size="2" name="body_auto"></td>
+                    <td>修正 <input type="text" size="2" name="body_human"></td>
+                    <td>修正 <input type="text" size="2" name="body_beast"></td>
+                </tr>
+                <tr>
+                    <th>【技術】</th>
+                    <td>修正 <input type="text" size="2" name="skill_auto"></td>
+                    <td>修正 <input type="text" size="2" name="skill_human"></td>
+                    <td>修正 <input type="text" size="2" name="skill_beast"></td>
+                </tr>
+                <tr>
+                    <th>【感情】</th>
+                    <td>修正 <input type="text" size="2" name="emotion_auto"></td>
+                    <td>修正 <input type="text" size="2" name="emotion_human"></td>
+                    <td>修正 <input type="text" size="2" name="emotion_beast"></td>
+                </tr>
+                <tr>
+                    <th>【加護】</th>
+                    <td>修正 <input type="text" size="2" name="divine_auto"></td>
+                    <td>修正 <input type="text" size="2" name="divine_human"></td>
+                    <td>修正 <input type="text" size="2" name="divine_beast"></td>
+                </tr>
+                <tr>
+                    <th>【社会】</th>
+                    <td>修正 <input type="text" size="2" name="society_auto"></td>
+                    <td>修正 <input type="text" size="2" name="society_human"></td>
+                    <td>修正 <input type="text" size="2" name="society_beast"></td>
+                </tr>
+                <tr class="w3-pale-blue">
+                    <th>【戦闘能力値】<br>判定</th>
+                    <td>修正 <input type="text" size="2" name="battle_auto"></td>
+                    <td>修正 <input type="text" size="2" name="battle_human"></td>
+                    <td>修正 <input type="text" size="2" name="battle_beast"></td>
+                </tr>
+                <tr>
+                    <th>【白兵】</th>
+                    <td>修正 <input type="text" size="2" name="combat_auto"></td>
+                    <td>修正 <input type="text" size="2" name="combat_human"></td>
+                    <td>修正 <input type="text" size="2" name="combat_beast"></td>
+                </tr>
+                <tr>
+                    <th>【射撃】</th>
+                    <td>修正 <input type="text" size="2" name="shoot_auto"></td>
+                    <td>修正 <input type="text" size="2" name="shoot_human"></td>
+                    <td>修正 <input type="text" size="2" name="shoot_beast"></td>
+                </tr>
+                <tr>
+                    <th>【回避】</th>
+                    <td>修正 <input type="text" size="2" name="dodge_auto"></td>
+                    <td>修正 <input type="text" size="2" name="dodge_human"></td>
+                    <td>修正 <input type="text" size="2" name="dodge_beast"></td>
+                </tr>
+                <tr>
+                    <th>【行動】</th>
+                    <td>修正 <input type="text" size="2" name="action_auto"></td>
+                    <td>修正 <input type="text" size="2" name="action_human"></td>
+                    <td>修正 <input type="text" size="2" name="action_beast"></td>
+                </tr>
+                </form>
+            </table>
+            <div class="w3-container clearfix" style="float: left;">
+                <div class="w3-container">
+                    <p class="w3-border-bottom w3-leftbar w3-border-red" style="font-weight:bold; padding-left:0.5em;">記入の仕方</p>
+                    <ul class="w3-small">
+                        <li>それぞれの【能力値】で判定を行う時に、常時アーツや装備の効果でかかる達成値への修正について、<strong class="w3-text-red">符号付きの数字</strong>を欄に記入する。</li>
+                        <li>「常時修正」は《魔獣化》中かどうかにかかわらず常にかかる修正を記入する。</li>
+                        <li>「人間状態」は《魔獣化》していない時のみかかる修正を記入する。</li>
+                        <li>「魔獣化中」は《魔獣化》中のみかかる修正を記入する。</li>
+                        <li>命中判定などのパレットは別途コピー＆ペーストしつつ加工すること。</li>
+                    </ul>
+                </div>
+                <div class="w3-container">
+                    <p class="w3-border-bottom w3-leftbar w3-border-red" style="font-weight:bold; padding-left:0.5em;">記載の事例</p>
+                    <ul class="w3-small">
+                        <li><strong>《魔剣の使い手》</strong>：「全ての判定」→「常時修正」→「+1」と記入</li>
+                        <li><strong>《幻想存在：●●》</strong>：対応する能力値→「魔獣化中」→「+2」と記入</li>
+                        <li><strong>《ダメ人間》</strong>：「全ての判定」→「人間状態」→「-2」と記入</li>
+                        <li><strong>《ダメ魔物》</strong>：「全ての判定」→「人間状態」→「+2」と記入</li>
+                    </ul>
+                </div>
+                <div class="w3-container">
+                    <p class="w3-border-bottom w3-leftbar w3-border-indigo" style="font-weight:bold; padding-left:0.5em;">汎用ファンブル値の設定</p>
+                    <p class="w3-small">　取得しているアーツにチェックを入れること。</p>
+                    <form name="fumble_fix">
+                        <ul class="columns" style="list-style-type:none; padding-left:1em;">
+                            <li><label><input type="checkbox" name="badbeast"><b>《ダメ魔物》</b>（ダメ半魔）</label></li>
+                            <li><label><input type="checkbox" name="ohno"><b>《しまった、こんな時に！》</b>（ダメ半魔）</label></li>
+                            <li><label><input type="checkbox" name="greatold"><b>《偉大なる血脈》</b>（落とし子）</label></li>
+                            <li><label><input type="checkbox" name="unworldly"><b>《この世ならざるもの》</b>（落とし子）</label></li>
+                            <li><label><input type="checkbox" name="sciencefantasy"><b>《不思議科学》</b>（マッドサイエンティスト）</label></li>
+                            <li><label><input type="checkbox" name="bodyrebuild"><b>《身体改造処置》</b>（ダークカルテル）</label></li>
+                            <li><label><input type="checkbox" name="mindrebuild"><b>《精神強化処置》</b>（ダークカルテル）</label></li>
+                            <li><label><input type="checkbox" name="unstablehigh"><b>《不安定なる高性能》</b>（偽ヒーロー、魔獣化中のみ扱い）</label></li>
+                            <li><label><input type="checkbox" name="return_unluck"><b>《契約代償：不運》</b>（契約者）</label></li>
+                            <li><label><input type="checkbox" name="secretname"><b>《秘されし真名》</b>（伝説の英雄）</label></li>
+                        </ul>
+                        <p class="w3-small">
+                            手動でクリティカル値に補正を掛ける場合、<b>2BB+10%{人間性}<span class="w3-text-red" style="text-decoration:underline">@-1</span></b> のように書くとよい。<br>
+                            手動でファンブル値に補正を掛ける場合、<b>2BB+10%{人間性}<span class="w3-text-red" style="text-decoration:underline">#+1</span></b> のように書くとよい。<br>
+                            複数組み合わせる場合、2BB+10%{人間性}@-1#+1 のように、人間性→クリティカル値修正→ファンブル値修正の順で書く。<br>
+                            修正値を記入する場合、2BB+10+3%{人間性} のように、人間性やクリティカル値修正を指定する前に記入すること。<br>
+                            「エヴィルセンス」および《それでこそ我がライバル！》は、2BB+10%{人間性}<strong class="w3-text-red" style="text-decoration: underline;">&3</strong> のように、&3 と最後に付けることで自動処理できる。
+                        </p>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ex-ud: ユドナリウム駒コンバーターの機能を内蔵させる -->
+    <div class="w3-container" style="margin-bottom: 1em; display: none;" id="section_ex">
+        <p class="w3-panel w3-leftbar w3-border-bottom w3-large w3-border-indigo">オンセツール側の駒変換器機能</p>
+        <p class="w3-small">
+            選択しているオンセツールがファイルのドラッグ＆ドロップ等によってキャラクター駒を読み込む機能がある場合、その駒を作成するかどうかも選ぶことができます。
+        </p>
+        <form name="output_pone" style="padding: 0em 2em;">
+            <div style="margin:0.5em;">
+                <label class="w3-small" style="font-weight:bold;">
+                    <input type="checkbox" name="using" onChange="document.pone_converter.style.display=(document.output_pone.using.checked ? 'block' : 'none')">
+                    この機能を使用する場合、チェックを入れる
+                </label>
+            </div>
+        </form>
+        <form name="pone_converter" style="padding: 0em 2em;">
+            <div id="pone_greatsin" class="w3-container pone_output">
+                <span class="w3-badge w3-teal w3-round" style="margin-right:1em; font-weight:bold;">大罪</span><br>
+                <label class="w3-small" style="margin:1em 2em;">
+                    <input type="checkbox" name="greatsin">
+                    大罪を取得したPCである（チェックが入っていると「愛」3点、ないなら「愛」4点のリソースを入力したコマを作成します）
+                </label>
+            </div>
+            <div id="pone_initialcredit" class="w3-container pone_output">
+                <span class="w3-badge w3-teal w3-round" style="margin-right:1em; font-weight:bold;">財産点</span><br>
+                <label class="w3-small" style="margin:1em 2em;">
+                    <input type="checkbox" name="initialcredit">
+                    初期財産点を調整する　
+                    <input type="number" name="ic_number" min="0" style="width:4em;">点（チェックが入っていないか未入力の場合、【社会】の値をそのまま使用します）
+                </label>
+            </div>
+            <div id="pone_nexus" class="w3-container pone_output">
+                <span class="w3-badge w3-teal w3-round" style="margin-right:1em; font-weight:bold;">絆・エゴ</span><br>
+                <label class="w3-small" style="margin:1em 2em;">
+                    <input type="checkbox" name="nexus">
+                    キャラクターシートに保存されている絆・エゴ情報を転記する（OFFの場合は絆・エゴ情報の出力自体を行いません）
+                </label>
+            </div>
+            <div id="pone_palette" class="w3-container pone_output">
+                <span class="w3-badge w3-teal w3-round" style="margin-right:1em; font-weight:bold;">チャットパレット</span><br>
+                <label class="w3-small" style="margin:1em 2em;">
+                    <input type="checkbox" name="palette" checked>
+                    生成したチャットパレットを駒データに紐付ける（チェックが入っている場合、駒データ内に紐付けます）
+                </label>
+            </div>
+            <div id="quick_convert" class="w3-container pone_output" style="display:block;">
+                <span class="w3-badge w3-teal w3-round" style="margin-right:1em; font-weight:bold;">即時出力に関して</span><br>
+                <label class="w3-small" style="margin:1em 2em;">
+                    <input type="checkbox" name="quick" checked onChange="document.converter_output.pone.style.display = this.checked ? 'none' : 'inline';">
+                    「チャットパレットに変換する」のボタンを押すと同時に駒データも出力する<br>
+                    （チェックしない場合、「駒データを出力する」のボタンが別途表示されます。<strong class="w3-text-red">チャットパレットをページ内で編集してから出力する場合はチェックを外してください</strong>）
+                </label>
+            </div>
+            <div id="pone_buffpalette" class="w3-container pone_output">
+                <span class="w3-badge w3-teal w3-round" style="margin-right:1em; font-weight:bold;">ユドナリウムリリィ：バフパレット</span><br>
+                <label class="w3-small" style="margin:1em 2em;">
+                    <input type="checkbox" name="buffpalette">
+                    「バフパレット」をキャラクター駒に組み込む<br>
+                    （デフォルトではOFFになっています。<strong class="w3-text-red">組み込む場合は必ずチェックを入れてください。</strong>書き方はユドナリウムリリィの駒を参照）
+                </label><br>
+                <textarea rows="4" cols="50" name="buffpalette_content" style="margin-left: 3em;"></textarea>
+            </div>
+            <div id="pone_ccfolia_config" class="w3-container pone_output">
+                <span class="w3-badge w3-teal w3-round" style="margin-right:1em; font-weight:bold;">ココフォリア：駒データの設定項目</span><br>
+                <strong class="w3-text-red w3-small">
+                    作成したzipファイルを、そのままココフォリアの部屋にドラッグ＆ドロップすれば使用できます。<br>
+                    本機能は、支援者向けの試供機能である「部屋のエクスポート機能」から逆算して作成しています。ココフォリアの更新によって使用できなくなることがありえますのでご了承ください。
+                </strong><br>
+                <label class="w3-small" style="margin:1em 2em;">
+                    <input type="checkbox" name="ccfolia_pone_size_check" checked>
+                    駒サイズを調整する　
+                    <input type="number" name="ccfolia_pone_size" min="1" value="2" style="width:4em;">（未チェックの場合「2」とする）
+                </label><br>
+                <label class="w3-small" style="margin:1em 2em;">
+                    <input type="checkbox" name="ccfolia_pone_secret">
+                    ステータスを非公開にする
+                </label><br>
+                <label class="w3-small" style="margin:1em 2em;">
+                    <input type="checkbox" name="ccfolia_pone_invisible">
+                    発言時キャラクターを表示しない
+                </label><br>
+                <label class="w3-small" style="margin:1em 2em;">
+                    <input type="checkbox" name="ccfolia_pone_hideStatus">
+                    盤面キャラクター一覧に表示しない
+                </label>
+            </div>
+        </form>
+    </div>
+
+    <!-- 7: 出力ボタン -->
+    <div class="w3-container" style="margin: 1em;">
+        <form name="converter_output">
+            <button name="palette" class="w3-btn w3-indigo w3-hover-dark-grey w3-round" type="button" onclick="btn_click();">
+                チャットパレットに変換する
+            </button>
+            <span style="margin:1em;"></span>
+            <button name="pone" class="w3-btn w3-teal w3-hover-dark-grey w3-round" type="button" disabled onclick="pone_click();" style="display:none;">
+                駒データを出力する
+            </button>
+        </form>
+    </div>
+
+    <!-- 8: 仮出力 -->
+    <div class="w3-container" style="margin-bottom: 2em;">
+        <p class="w3-border-bottom w3-leftbar w3-border-indigo" style="font-weight:bold; padding-left:0.5em;">変換結果の表示</p>
+        <p class="w3-small">
+            変換後のテキストデータが下に表示されます。コピーして各種オンセツールに貼り付けて使用してください。<br>
+            <strong class="w3-text-red">使用前に必ず、自分が想定しているものと差がないかはチェックしてください。特にダメージロール関連テキストは確認を推奨します。</strong>
+        </p>
+        <form name="result" style="display:none;">
+            <textarea rows="10" cols="60" name="text"></textarea>
+        </form>
+    </div>
+
+    <!-- 9: 更新履歴 -->
+    <div class="w3-container" style="margin-bottom: 2em;">
+        <p class="w3-border-bottom w3-leftbar w3-border-indigo" style="font-weight:bold; padding-left:0.5em;">更新履歴</p>
+        <p class="w3-small">
+            過去の更新履歴は <A href="patchnotes.html" target="_blank">Patchnotes</A> でご確認ください。
+        </p>
+        <ul class="w3-small">
+            <li><b>2021/4/22 - version 2.3.0 released</b>
+                <ul>
+                    <li>自身のwebサイト閉鎖に伴い、GitHubにて公開。</li>
+                    <li>駒コンバーターの絆・エゴ情報の出力形式を変更。チェックを入れない場合、全く出力されなくなります。</li>
+                    <li>判定構文の出力順を「能力値別か」「《魔獣化》中かどうか」で調整できるように機能追加。『基本的な出力のオプション』から設定できます。</li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+
+    <!-- 10: 連絡先 -->
+    <div class="w3-container" style="margin-bottom: 2em;">
+        <p class="w3-border-bottom w3-leftbar w3-border-indigo" style="font-weight:bold; padding-left:0.5em;">その他</p>
+        <p class="w3-small">
+            本ツールの倉坂悠による開発は終了しております。<br>
+            改造したものの再配布などはご自由にどうぞ。
+        </p>
+    </div>
+
+<!-- javascriptファイルの読み込み：cdnjsから読み込める分はそちらから読み込み -->
+<script type="text/javascript" src="script/onlinetools.js"></script>
+<script type="text/javascript" src="script/convert_damage_rolls.js"></script>
+<script type="text/javascript" src="script/core.js"></script>
+<script type="text/javascript" src="script/pone_converter.js"></script>
+<script type="text/javascript" src="script/sha256.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.js" integrity="sha512-B+gr+zLWg81qxVwvtYwKrmjvQtZKD/GGFF7jD80OfzbqFw+NsbS5faEqpCO7Q7oRw1bYi0+WLJf54j8Vm7NADw==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.6.0/jszip.js" integrity="sha512-djAJLNukP3WdWmwP/Y05w99aCX6u1jInpshdwiUKbXcQ9y/8BpMtsPsVrVyUbmtEx7wbqFpBq4sGOnIFVScFQQ==" crossorigin="anonymous"></script>
+
+</body>
+
+</html>
