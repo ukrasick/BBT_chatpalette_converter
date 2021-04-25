@@ -395,6 +395,7 @@ function convert_process(data) {
         window.alert('エラー：データが取得できませんでした。キャラクターシートのURLを再確認してください。');
         return;
     }
+    console.log(data);
     // result準備
     let result = {};
     // オンラインセッション用ツールの確認

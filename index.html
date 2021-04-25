@@ -2,6 +2,17 @@
 <html prefix="og: http://ogp.me/ns#">
 <head>
     <meta charset="UTF-8" />
+	    <!-- OGPタグの設定 -->
+  		<meta property="og:url" content="http://niltheria.daynight.jp/bbt/tools/index.html" />
+		<meta property="og:title" content="BBT セッション準備支援ツール" />
+		<meta property="og:description" content="「ビーストバインドトリニティ」用の、主にオンラインセッションの準備を簡略化するためのwebツール集。" />
+		<meta property="og:image" content="http://niltheria.daynight.jp/sitelogo_summary.png" />
+		<meta property="og:type" content="article" />
+		<meta property="og:site_name" content="NiLtheria" />
+		<meta property="og:locale" content="ja_JP" />
+		<meta name="twitter:card" content="summary" />
+		<meta name="twitter:site" content="@u_krasaka" />
+    <!-- ここまで -->
 
     <!-- HTML タイトル -->
     <title>BBT チャットパレットコンバーター</title>
@@ -440,13 +451,20 @@
             過去の更新履歴は <A href="patchnotes.html" target="_blank">Patchnotes</A> でご確認ください。
         </p>
         <ul class="w3-small">
-            <li><b>2021/4/22 - version 2.3.0 released</b>
+            <li><b>2021/4/26 - version 2.3.0 released</b>
                 <ul>
-                    <li>自身のwebサイト閉鎖に伴い、GitHubにて公開。</li>
-                    <li>駒コンバーターの絆・エゴ情報の出力形式を変更。チェックを入れない場合、全く出力されなくなります。</li>
                     <li>判定構文の出力順を「能力値別か」「《魔獣化》中かどうか」で調整できるように機能追加。『基本的な出力のオプション』から設定できます。</li>
+                    <li>駒コンバーターの機能を拡張。
+                        <ul>
+                            <li>絆・エゴ情報の出力形式を変更。チェックを入れない場合、全く出力されなくなります。</li>
+                            <li>ルーツに「呪われし者」が含まれている場合、「反動」のステータスを作成します。</li>
+                        </ul>
+                    </li>
                 </ul>
             </li>
+        </ul>
+        <ul class="w3-small">
+            <li>基本的な開発を終了します。ソースコードもGitHubにて公開。</li>
         </ul>
     </div>
 
@@ -454,8 +472,8 @@
     <div class="w3-container" style="margin-bottom: 2em;">
         <p class="w3-border-bottom w3-leftbar w3-border-indigo" style="font-weight:bold; padding-left:0.5em;">その他</p>
         <p class="w3-small">
-            本ツールの倉坂悠による開発は終了しております。<br>
-            改造したものの再配布などはご自由にどうぞ。
+            本ツールの倉坂悠による開発はほぼすべて終了しております。改造したものの再配布などはご自由にどうぞ。<br>
+            （現在、自身に種々の問題がありTwitterを利用しておりません。ご了承ください）
         </p>
     </div>
 

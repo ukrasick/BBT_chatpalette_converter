@@ -208,9 +208,12 @@ function udona_status(data) {
             tabstr(1) + `<data name="人間性">${status.humanity[0]}</data>`,
             tabstr(1) + `<data name="愛">${status.agape}</data>`,
             tabstr(1) + `<data name="罪">0</data>`,
-            tabstr(1) + `<data name="財産点">${status.credit}</data>`,
-        '</data>'
+            tabstr(1) + `<data name="財産点">${status.credit}</data>`
     ];
+    if(check_CursedOne(data)) {
+        src.push(tabstr(1) + `<data name="反動">0</data>`);
+    }
+    src.push('</data>');
     // 結果の出力
     result.src = src.join("\n");
     return result;
@@ -278,6 +281,9 @@ function ccfolia_status(data) {
         {max: 7, value: 0, label: "罪"},
         {max: status.credit, value: status.credit, label: "財産点"}
     ];
+    if(check_CursedOne(data)) {
+        result.push({max: 0, value: 0, label: "反動"});
+    }
     return result;
 }
 
@@ -385,6 +391,23 @@ function ccfolia_process(data) {
     zip.generateAsync({type:"blob"}).then(function(content) {
         saveAs(content, `${data.base.name}.zip`);
     });
+}
+
+// ルーツに「呪われし者」が含まれているかどうかを確認する
+function check_CursedOne(data) {
+    /*
+    キャラクターシート倉庫で一度「手動入力」でルーツ名を入力した後、そのまま通常のブラッド選択に戻すと、rootmanualがそのまま持ち越されてしまうことに注意。
+    当面はroot.bloodとroot.rootmanualの両方を指定して対応とする。
+    ----------
+    キャラクターシート倉庫で既存のルーツを選択する場合、ブラッドごとに"0"から順にナンバリングで保管されている。（0: 転校生, 1: 電脳魔術師, ... 6: 名探偵。プルダウンの上から順に番号振り）
+    サプリメントでどのような順番に並べられるかは不明だが、GF誌の掲載順にデータが載るとすれば、「7: 帰還者, 8: ヴィラン, 9: 呪われし者」となる。
+    そのため、無事最終サプリメントが発刊された場合の修正は if(root.blood === "ストレンジャー" && root.root === "9") で分岐を追加するのが良いと思われる。キャラシ倉庫を要確認。
+    */
+    let rootslist = [data.base.bloods.primary, data.base.bloods.secondary].concat(data.addRoots);
+    for(let root of rootslist) {
+        if(root.blood === "手動入力" && root.rootmanual === "呪われし者") { return true;}
+    }
+    return false;
 }
 
 // 初期文字列としてタブを指定数挿入する
